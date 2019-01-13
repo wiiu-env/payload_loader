@@ -11,6 +11,7 @@ extern "C" {
 #define OSDynLoad_Acquire ((void (*)(char* rpl, unsigned int *handle))0x0102A3B4)
 #define OSDynLoad_FindExport ((void (*)(unsigned int handle, int isdata, char *symbol, void *address))0x0102B828)
 #define OSFatal ((void (*)(char* msg))0x01031618)
+#define __os_snprintf ((int(*)(char* s, int n, const char * format, ... ))0x0102F160)
 
 #define ADDRESS_OSTitle_main_entry_ptr              0x1005E040
 #define ADDRESS_main_entry_hook                     0x0101c56c

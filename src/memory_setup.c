@@ -9,14 +9,14 @@ static void SCSetupIBAT4DBAT5() {
     asm volatile("eieio; isync");
 
     // Give our and the kernel full execution rights.
-    // VA: 00000000..00800000 PA: 30000000..30800000  with r/w for user and supervisor
+    // 00800000-01000000 => 30800000-31000000 (read/write, user/supervisor)
     unsigned int ibat4u = 0x008000FF;
     unsigned int ibat4l = 0x30800012;
     asm volatile("mtspr 560, %0" : : "r" (ibat4u));
     asm volatile("mtspr 561, %0" : : "r" (ibat4l));
 
     // Give our and the kernel full data access rights.
-    // VA: 00000000..00800000 PA: 30000000..30800000  with r/w for user and supervisor
+    // 00800000-01000000 => 30800000-31000000 (read/write, user/supervisor)
     unsigned int dbat5u = ibat4u;
     unsigned int dbat5l = ibat4l;
     asm volatile("mtspr 570, %0" : : "r" (dbat5u));

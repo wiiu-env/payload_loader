@@ -29,16 +29,18 @@ static int32_t LoadFileToMem(private_data_t *private_data, const char *filepath,
 
         int32_t status = private_data->FSGetMountSource(pClient, pCmd, 0, tempPath, -1);
         if (status != 0) {
-            OSFatal("FSGetMountSource failed.");
+            OSFatal("FSGetMountSource failed. Please insert a FAT32 formatted sd card.");
         }
         status = private_data->FSMount(pClient, pCmd, tempPath, mountPath, FS_MAX_MOUNTPATH_SIZE, -1);
         if(status != 0) {
-            OSFatal("SD mount failed.");
+            OSFatal("SD mount failed. Please insert a FAT32 formatted sd card.");
         }
 
         status = private_data->FSOpenFile(pClient, pCmd, filepath, "r", &iFd, -1);
         if(status != 0) {
-            OSFatal("FSOpenFile failed.");
+            char buf[0x255];
+            __os_snprintf(buf,0x254,"FSOpenFile failed. File missing %s",filepath);            
+            OSFatal(buf);
         }
 
         FSStat stat;

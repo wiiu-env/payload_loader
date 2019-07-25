@@ -60,8 +60,8 @@ and execute kernel syscall.
 but with r/w for the kernel. Resetting is not needed when using the Mii Maker,
 but may be needed to be adjusted.
 - Afterwards it's possible to register an own syscall (we use 0x36 as it's unused)
-to setup IBAT4 and DBAT5 to make `00000000..00800000` (virtual address) to
-`30000000..30800000` (physical address) with r/w for user and supervisor.
+to setup IBAT4 and DBAT5 to make `00800000..01000000` (virtual address) to
+`30800000..31000000` (physical address) with r/w for user and supervisor.
 This allows full user/kernel access to this region, for data and code.
 - The mapping is done for all 3 cores.
 

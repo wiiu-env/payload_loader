@@ -15,4 +15,4 @@ SECTIONS {
 	}
 }
 
-ASSERT((SIZEOF(.text) + SIZEOF(.data)) < 0x2000, "please recude the size.");
+ASSERT((SIZEOF(.text) + SIZEOF(.data)) < 0x3000, "please recude the size.");

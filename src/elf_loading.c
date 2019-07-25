@@ -9,12 +9,14 @@ static int32_t LoadFileToMem(private_data_t *private_data, const char *filepath,
     int32_t iFd = -1;
     void *pClient = private_data->MEMAllocFromDefaultHeapEx(FS_CLIENT_SIZE, 4);
     if(!pClient) {
+        ExitFailure(private_data, "Failed to allocate pClient.");
         return 0;
     }
 
     void *pCmd = private_data->MEMAllocFromDefaultHeapEx(FS_CMD_BLOCK_SIZE, 4);
     if(!pCmd) {
         private_data->MEMFreeToDefaultHeap(pClient);
+        ExitFailure(private_data, "Failed to allocate pCmd.");
         return 0;
     }
 
@@ -29,18 +31,21 @@ static int32_t LoadFileToMem(private_data_t *private_data, const char *filepath,
 
         int32_t status = private_data->FSGetMountSource(pClient, pCmd, 0, tempPath, -1);
         if (status != 0) {
-            OSFatal("FSGetMountSource failed. Please insert a FAT32 formatted sd card.");
+            ExitFailure(private_data, "FSGetMountSource failed. Please insert a FAT32 formatted sd card.");
+            return 0;
         }
         status = private_data->FSMount(pClient, pCmd, tempPath, mountPath, FS_MAX_MOUNTPATH_SIZE, -1);
         if(status != 0) {
-            OSFatal("SD mount failed. Please insert a FAT32 formatted sd card.");
+            ExitFailure(private_data, "SD mount failed. Please insert a FAT32 formatted sd card.");
+            return 0;
         }
 
         status = private_data->FSOpenFile(pClient, pCmd, filepath, "r", &iFd, -1);
         if(status != 0) {
             char buf[0x255];
-            __os_snprintf(buf,0x254,"FSOpenFile failed. File missing %s",filepath);            
-            OSFatal(buf);
+            __os_snprintf(buf,0x254,"FSOpenFile failed. File missing %s",filepath);
+            ExitFailure(private_data, buf);
+            return 0;
         }
 
         FSStat stat;
@@ -50,10 +55,12 @@ static int32_t LoadFileToMem(private_data_t *private_data, const char *filepath,
 
         private_data->FSGetStatFile(pClient, pCmd, iFd, &stat, -1);
 
-        if(stat.size > 0)
+        if(stat.size > 0) {
             pBuffer = private_data->MEMAllocFromDefaultHeapEx((stat.size + 0x3F) & ~0x3F, 0x40);
-        else
-            OSFatal("ELF file empty.");
+        } else {
+            ExitFailure(private_data, "ELF file empty.");
+            return 0;
+        }
 
         uint32_t done = 0;
 
@@ -66,6 +73,7 @@ static int32_t LoadFileToMem(private_data_t *private_data, const char *filepath,
         }
 
         if(done != stat.size) {
+            ExitFailure(private_data, "Loaded file size was not as expected");
             private_data->MEMFreeToDefaultHeap(pBuffer);
         } else {
             *fileOut = (uint8_t*)pBuffer;
@@ -92,10 +100,12 @@ static uint32_t load_elf_image_to_mem (private_data_t *private_data, uint8_t *el
     ehdr = (Elf32_Ehdr *) elfstart;
 
     if(ehdr->e_phoff == 0 || ehdr->e_phnum == 0) {
+        ExitFailure(private_data, "e_phoff or e_phnum were NULL");
         return 0;
     }
 
     if(ehdr->e_phentsize != sizeof(Elf32_Phdr)) {
+        ExitFailure(private_data, "wrong e_phentsize");
         return 0;
     }
 
@@ -141,24 +151,25 @@ static uint32_t load_elf_image_to_mem (private_data_t *private_data, uint8_t *el
     return ehdr->e_entry;
 }
 
-uint32_t LoadAndCopyFile(const char *filepath) {
-    private_data_t private_data;
-
-    loadFunctionPointers(&private_data);
-
+uint32_t LoadAndCopyFile(const char *filepath, private_data_t * private_data) {
     unsigned char *pElfBuffer = NULL;
     unsigned int uiElfSize = 0;
 
-    LoadFileToMem(&private_data, filepath, &pElfBuffer, &uiElfSize);
+    if(!LoadFileToMem(private_data, filepath, &pElfBuffer, &uiElfSize)){
+        // Error messages are set inside the function
+        return 0;
+    }
 
     if(!pElfBuffer) {
-        OSFatal("Failed to load homebrew_launcher.elf");
+        ExitFailure(private_data, "Failed to load homebrew_launcher.elf");
+        return 0;
     }
-    unsigned int newEntry = load_elf_image_to_mem(&private_data, pElfBuffer);
+    unsigned int newEntry = load_elf_image_to_mem(private_data, pElfBuffer);
     if(newEntry == 0) {
-        OSFatal("failed to load .elf");
+        // Error messages are set inside the function
+        return 0;
     }
 
-    private_data.MEMFreeToDefaultHeap(pElfBuffer);
+    private_data->MEMFreeToDefaultHeap(pElfBuffer);
     return newEntry;
 }

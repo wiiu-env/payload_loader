@@ -8,6 +8,11 @@
 extern "C" {
 #endif
 
+#include <stdint.h>
+
+#define BUS_SPEED                       248625000
+#define SECS_TO_TICKS(sec) (((unsigned long long)(sec)) * (BUS_SPEED/4))
+
 typedef struct _private_data_t {
     EXPORT_DECL(void *, MEMAllocFromDefaultHeapEx,int size, int align);
     EXPORT_DECL(void, MEMFreeToDefaultHeap,void *ptr);
@@ -33,7 +38,22 @@ typedef struct _private_data_t {
     EXPORT_DECL(int, FSReadFile, void *pClient, void *pCmd, void *buffer, int size, int count, int fd, int flag, int errHandling);
     EXPORT_DECL(int, FSCloseFile, void *pClient, void *pCmd, int fd, int errHandling);
 
+    EXPORT_DECL(unsigned int, OSScreenPutFontEx, unsigned int bufferNum, unsigned int posX, unsigned int posY, const char * buffer);
+
+    EXPORT_DECL(void, OSScreenInit, void);
+    EXPORT_DECL(void, OSForceFullRelaunch, void);
+    EXPORT_DECL(unsigned int, OSScreenGetBufferSizeEx, unsigned int bufferNum);
+    EXPORT_DECL(unsigned int, OSScreenSetBufferEx, unsigned int bufferNum, void * addr);
+    EXPORT_DECL(unsigned int, OSScreenClearBufferEx, unsigned int bufferNum, unsigned int temp);
+    EXPORT_DECL(unsigned int, OSScreenFlipBuffersEx, unsigned int bufferNum);
+    EXPORT_DECL(unsigned int, OSSleepTicks, uint64_t ticks);
+
     EXPORT_DECL(int, SYSRelaunchTitle, int argc, char** argv);
+    EXPORT_DECL(void, SYSLaunchMenu, void);
+    EXPORT_DECL(void, _SYSLaunchMiiStudio, void);
+    EXPORT_DECL(int, _SYSLaunchTitleWithStdArgsInNoSplash, unsigned long long tid, void *ptr);
+    EXPORT_DECL(unsigned long long, _SYSGetSystemApplicationTitleId, int sysApp);
+    uint64_t sysmenuTitleID;
 } private_data_t;
 
 #ifdef __cplusplus

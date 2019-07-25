@@ -8,7 +8,13 @@
 extern "C" {
 #endif
 
+void revertMainHook();
+
 void loadFunctionPointers(private_data_t * private_data);
+
+void PrepareScreen(private_data_t *private_data);
+
+void ExitFailure(private_data_t *private_data, const char *failure);
 
 /* Read a 32-bit word with kernel permissions */
 uint32_t __attribute__ ((noinline)) kern_read(const void *addr);

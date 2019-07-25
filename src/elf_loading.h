@@ -6,8 +6,9 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+#include "structs.h"
 
-uint32_t LoadAndCopyFile(const char *filepath);
+uint32_t LoadAndCopyFile(const char *filepath, private_data_t * private_data);
 
 #ifdef __cplusplus
 }

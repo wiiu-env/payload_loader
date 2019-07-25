@@ -100,7 +100,7 @@ void setup_memory() {
 
         int ret = OSCreateThread(thread, thread_callback, 0, (void*)0, (unsigned int)stack+0x4000, 0x4000, 0, 0x8 + (1 << i));
         if (ret == 0) {
-            OSFatal("Failed to create thread. Exit and re-enter browser.");
+            OSFatal("Failed to create thread.");
         }
 
         // Schedule it for execution
